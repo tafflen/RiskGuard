@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RiskGuard — Community Disaster Safety Platform</title>
+<style>
+  :root{
+    --bg: #eef1f5;
+    --panel: #ffffff;
+    --panel-2: #f3f5f8;
+    --border: #d9dfe6;
+    --text: #1b2430;
+    --muted: #5b6b7c;
+    --accent: #0f766e;      /* deep teal, works on white */
+    --low: #15803d;
+    --medium: #b45309;
+    --high: #c2410c;
+    --critical: #b91c1c;
+    --danger-bg: rgba(185,28,28,0.08);
+    --focus: #0f766e;
+    font-size: 16px;
+  }
+  * { box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: radial-gradient(1200px 600px at 50% -10%, #f6f8fa 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); }
+  .wrap{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  header.top{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    text-align:center;
+    padding: 18px 0 28px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand-mark{
+    width:34px; height:34px; border-radius:9px;
+    background: linear-gradient(135deg, var(--accent), #134e4a);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+  }
+  header.top h1{
+    margin:0;
+    font-size: 1.6rem;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+  }
+  header.top p{
+    margin:0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(16,24,32,0.04);
+  }
+  .card h2{
+    margin: 0 0 14px 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  .field-row{
+    display:flex; gap:12px; flex-wrap:wrap;
+  }
+  .field{
+    flex: 1 1 140px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .field label{
+    font-size: 0.78rem; color: var(--muted);
+  }
+  .field input{
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .field input:focus{ border-color: var(--focus); box-shadow: 0 0 0 3px rgba(15,118,110,0.15); }
+
+  .actions{
+    display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap;
+  }
+  button{
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: transform 0.05s ease, opacity 0.15s ease;
+  }
+  button:active{ transform: scale(0.98); }
+  button:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn-primary{
+    background: var(--accent);
+    color: #f0fdfa;
+    flex: 1 1 auto;
+  }
+  .btn-primary:hover{ opacity:0.92; }
+  .btn-primary:disabled{ opacity:0.5; cursor:not-allowed; }
+  .btn-secondary{
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .status-line{
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 1.2em;
+  }
+  .status-line.error{ color: var(--critical); }
+
+  /* Risk score */
+  .score-card{ text-align:center; }
+  .score-number{
+    font-size: 3.4rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 4px 0 2px;
+  }
+  .score-suffix{ font-size: 1.3rem; color: var(--muted); font-weight: 500; }
+  .risk-pill{
+    display:inline-block;
+    margin-top: 10px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .risk-pill.LOW{ background: rgba(21,128,61,0.12); color: var(--low); }
+  .risk-pill.MEDIUM{ background: rgba(180,83,9,0.12); color: var(--medium); }
+  .risk-pill.HIGH{ background: rgba(194,65,12,0.12); color: var(--high); }
+  .risk-pill.CRITICAL{ background: rgba(185,28,28,0.12); color: var(--critical); }
+  .confidence-line{
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .two-col{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 640px){
+    .two-col{ grid-template-columns: 1fr; }
+  }
+
+  .hazard-item, .shelter-item{
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--panel-2);
+  }
+  .hazard-item:last-child, .shelter-item:last-child{ margin-bottom:0; }
+  .hazard-top{
+    display:flex; justify-content:space-between; align-items:center;
+    font-weight: 700; font-size: 0.92rem;
+  }
+  .hazard-meta{
+    color: var(--muted); font-size: 0.8rem; margin-top: 4px;
+  }
+  .badge{
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--danger-bg);
+    color: var(--high);
+  }
+  .badge.demo{
+    background: rgba(91,107,124,0.12);
+    color: var(--muted);
+  }
+  .empty-note{ color: var(--muted); font-size: 0.85rem; }
+
+  .factor-list{ list-style: none; margin:0; padding:0; }
+  .factor-list li{
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    display:flex; gap:8px;
+  }
+  .factor-list li:last-child{ border-bottom:none; }
+  .factor-list li::before{ content:"✓"; color: var(--accent); font-weight:700; }
+
+  .recommend{
+    border-left: 3px solid var(--high);
+    background: var(--danger-bg);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .source-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-top: 6px;
+  }
+  .source-tag .dot{
+    width:6px; height:6px; border-radius:50%; background: var(--muted);
+  }
+
+  footer.disclaimer{
+    text-align:center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 24px;
+    line-height: 1.5;
+  }
+
+  .skeleton{
+    height: 14px; border-radius: 6px;
+    background: linear-gradient(90deg, var(--panel-2) 25%, var(--border) 50%, var(--panel-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer{
+    0%{ background-position: 200% 0; }
+    100%{ background-position: -200% 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">🛡️</div>
+      <h1>RISKGUARD</h1>
+    </div>
+    <p>Community Disaster Safety Platform</p>
+  </header>
+
+  <!-- Location input -->
+  <section class="card">
+    <h2>📍 Assess Location</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="lat">Latitude</label>
+        <input id="lat" type="number" step="0.0001" value="13.0827" />
+      </div>
+      <div class="field">
+        <label for="lng">Longitude</label>
+        <input id="lng" type="number" step="0.0001" value="80.2707" />
+      </div>
+      <div class="field" style="flex: 0 1 110px;">
+        <label for="radius">Radius (km)</label>
+        <input id="radius" type="number" step="1" value="25" />
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="assessBtn">Assess Risk</button>
+      <button class="btn-secondary" id="locateBtn">Use My Location</button>
+    </div>
+    <div class="status-line" id="statusLine"></div>
+  </section>
+
+  <!-- Risk score -->
+  <section class="card score-card" id="scoreCard" style="display:none;">
+    <h2 style="text-align:center;">Risk Score</h2>
+    <div class="score-number" id="scoreNumber">—</div>
+    <div class="score-suffix">/ 100</div>
+    <div class="risk-pill" id="riskPill">—</div>
+    <div class="confidence-line" id="confidenceLine"></div>
+  </section>
+
+  <!-- Hazards + Shelters -->
+  <div class="two-col" id="twoCol" style="display:none;">
+    <section class="card">
+      <h2>🌊 Active Hazards</h2>
+      <div id="hazardList"><p class="empty-note">Run an assessment to see hazards.</p></div>
+    </section>
+    <section class="card">
+      <h2>🏠 Safe Shelters</h2>
+      <div id="shelterList"><p class="empty-note">Run an assessment to see shelters.</p></div>
+    </section>
+  </div>
+
+  <!-- Explanation -->
+  <section class="card" id="explainCard" style="display:none;">
+    <h2>🛡️ Why This Risk?</h2>
+    <ul class="factor-list" id="factorList"></ul>
+  </section>
+
+  <!-- Recommended action -->
+  <section class="card" id="recommendCard" style="display:none;">
+    <h2>⚠️ Recommended Action</h2>
+    <div class="recommend" id="recommendText"></div>
+  </section>
+
+  <footer class="disclaimer">
+    This prototype uses a transparent deterministic risk engine operating on demonstration hazard data
+    (source: <strong>DEMO_DATA</strong>). The architecture is designed so validated real-world hazard
+    providers can replace the demo provider without changing the risk engine or UI.
+  </footer>
+
+</div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000/api/v1";
+
+  const el = (id) => document.getElementById(id);
+  const statusLine = el("statusLine");
+  const assessBtn = el("assessBtn");
+  const locateBtn = el("locateBtn");
+
+  function setStatus(msg, isError = false) {
+    statusLine.textContent = msg;
+    statusLine.classList.toggle("error", isError);
+  }
+
+  function riskLevelColorClass(level) {
+    const known = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+    const upper = (level || "").toUpperCase();
+    return known.includes(upper) ? upper : "MEDIUM";
+  }
+
+  function recommendationFor(level) {
+    const upper = (level || "").toUpperCase();
+    switch (upper) {
+      case "CRITICAL":
+        return "Evacuate the area immediately if instructed by local authorities, and move to the nearest verified shelter without delay.";
+      case "HIGH":
+        return "Avoid affected areas and move toward a verified nearby shelter. Stay alert for official updates.";
+      case "MEDIUM":
+        return "Stay informed and avoid unnecessary travel through the affected zone. Keep an emergency kit ready.";
+      case "LOW":
+        return "No immediate action required. Continue to monitor conditions if hazards are active nearby.";
+      default:
+        return "Monitor official channels for updates on this location.";
+    }
+  }
+
+  async function fetchJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = new Error(`Request failed (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+
+  function renderHazards(hazards) {
+    const container = el("hazardList");
+    if (!hazards || hazards.length === 0) {
+      container.innerHTML = '<p class="empty-note">No active hazards reported for this location.</p>';
+      return;
+    }
+    container.innerHTML = hazards.map(h => {
+      const type = (h.hazard_type || "UNKNOWN").toUpperCase();
+      const severity = (h.severity || "—").toUpperCase();
+      const confidence = h.confidence != null ? Math.round(h.confidence * 100) + "%" : "—";
+      const source = h.source || "DEMO_DATA";
+      return `
+        <div class="hazard-item">
+          <div class="hazard-top">
+            <span>${type}</span>
+            <span class="badge">${severity}</span>
+          </div>
+          <div class="hazard-meta">Confidence: ${confidence}</div>
+          <div class="source-tag"><span class="dot"></span>${source}</div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderShelters(shelters, note) {
+    const container = el("shelterList");
+    if (note) {
+      container.innerHTML = `<p class="empty-note">${note}</p>`;
+      return;
+    }
+    if (!shelters || shelters.length === 0) {
+      container.innerHTML = '<p class="empty-note">No shelters found nearby.</p>';
+      return;
+    }
+    container.innerHTML = shelters.map(s => {
+      const capacity = (s.capacity != null && s.current_occupancy != null)
+        ? `${s.current_occupancy}/${s.capacity} occupied`
+        : "Capacity unavailable";
+      const distance = s.distance_metres != null
+        ? `${(s.distance_metres / 1000).toFixed(1)} km away`
+        : "";
+      return `
+        <div class="shelter-item">
+          <div class="hazard-top">
+            <span>${s.name || "Unnamed shelter"}</span>
+          </div>
+          <div class="hazard-meta">${capacity}${distance ? " · " + distance : ""}</div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderFactors(factors) {
+    const list = el("factorList");
+    if (!factors || factors.length === 0) {
+      list.innerHTML = '<li style="opacity:0.6;">No contributing factors reported.</li>';
+      return;
+    }
+    list.innerHTML = factors.map(f => `<li>${f}</li>`).join("");
+  }
+
+  async function runAssessment() {
+    const lat = parseFloat(el("lat").value);
+    const lng = parseFloat(el("lng").value);
+    const radius = parseFloat(el("radius").value) || 25;
+
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      setStatus("Enter a valid latitude and longitude.", true);
+      return;
+    }
+
+    assessBtn.disabled = true;
+    setStatus("Checking hazards and calculating risk…");
+    el("scoreCard").style.display = "none";
+    el("twoCol").style.display = "none";
+    el("explainCard").style.display = "none";
+    el("recommendCard").style.display = "none";
+
+    try {
+      const assessUrl = `${API_BASE}/demo/assess?latitude=${lat}&longitude=${lng}&radius_km=${radius}`;
+      const assessment = await fetchJSON(assessUrl);
+
+      // Score card
+      el("scoreNumber").textContent = Math.round(assessment.risk_score ?? 0);
+      const levelClass = riskLevelColorClass(assessment.risk_level);
+      const pill = el("riskPill");
+      pill.textContent = `${(assessment.risk_level || "UNKNOWN").toUpperCase()} RISK`;
+      pill.className = `risk-pill ${levelClass}`;
+      const confidencePct = assessment.confidence != null ? Math.round(assessment.confidence * 100) : "—";
+      el("confidenceLine").textContent = `Confidence: ${confidencePct}% · Source: ${assessment.data_source || "DEMO_DATA"}`;
+      el("scoreCard").style.display = "block";
+
+      // Hazards from the assessment response itself
+      renderHazards(assessment.hazards);
+
+      // Explanation
+      renderFactors(assessment.factors);
+      el("explainCard").style.display = "block";
+
+      // Recommendation
+      el("recommendText").textContent = recommendationFor(assessment.risk_level);
+      el("recommendCard").style.display = "block";
+
+      el("twoCol").style.display = "grid";
+
+      setStatus(`Assessment complete for ${lat.toFixed(4)}, ${lng.toFixed(4)}.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Could not reach the risk assessment API (${err.message || err}). Is the backend running on port 8000?`, true);
+      assessBtn.disabled = false;
+      return;
+    }
+
+    // Shelters are best-effort: the endpoint may require auth.
+    try {
+      const shelterUrl = `${API_BASE}/demo/shelters?latitude=${lat}&longitude=${lng}&radius_km=${radius}`;
+      const shelterData = await fetchJSON(shelterUrl);
+      const shelters = Array.isArray(shelterData) ? shelterData : (shelterData.shelters || shelterData.items || []);
+      renderShelters(shelters);
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        renderShelters(null, "Shelter data requires sign-in in this prototype. Available via the authenticated API.");
+      } else {
+        renderShelters(null, "Shelter data is temporarily unavailable.");
+      }
+    }
+
+    assessBtn.disabled = false;
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setStatus("Geolocation is not supported in this browser.", true);
+      return;
+    }
+    setStatus("Requesting your location…");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        el("lat").value = pos.coords.latitude.toFixed(4);
+        el("lng").value = pos.coords.longitude.toFixed(4);
+        setStatus("Location detected. Ready to assess.");
+      },
+      () => setStatus("Could not get your location. Enter coordinates manually.", true)
+    );
+  }
+
+  assessBtn.addEventListener("click", runAssessment);
+  locateBtn.addEventListener("click", useMyLocation);
+
+  // Run an initial assessment on load using the default Chennai coordinates.
+  window.addEventListener("DOMContentLoaded", runAssessment);
+</script>
+</body>
+</html>
