@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+firebase-service-account*.json
+
+# Build and runtime artifacts
+build/
+dist/
+*.egg-info/
+logs/
+ml/models/*.joblib
+ml/models/*.json
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
